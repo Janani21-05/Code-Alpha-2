@@ -1,1 +1,178 @@
+import java.util.*;
 
+class Stock {
+    private String name;
+    private double price;
+
+    public Stock(String name, double price) {
+        this.name = name;
+        this.price = price;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    @Override
+    public String toString() {
+        return name + " - $" + price;
+    }
+}
+
+class Portfolio {
+    private Map<Stock, Integer> stocks = new HashMap<>();
+    private double balance;
+
+    public Portfolio(double initialBalance) {
+        this.balance = initialBalance;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void buyStock(Stock stock, int quantity) {
+        double cost = stock.getPrice() * quantity;
+        if (cost > balance) {
+            System.out.println("Not enough balance to buy " + quantity + " shares of " + stock.getName());
+        } else {
+            balance -= cost;
+            stocks.put(stock, stocks.getOrDefault(stock, 0) + quantity);
+            System.out.println("Bought " + quantity + " shares of " + stock.getName());
+        }
+    }
+
+    public void sellStock(Stock stock, int quantity) {
+        int ownedQuantity = stocks.getOrDefault(stock, 0);
+        if (ownedQuantity < quantity) {
+            System.out.println("Not enough shares to sell");
+        } else {
+            balance += stock.getPrice() * quantity;
+            stocks.put(stock, ownedQuantity - quantity);
+            System.out.println("Sold " + quantity + " shares of " + stock.getName());
+        }
+    }
+
+    public void displayPortfolio() {
+        System.out.println("Your Portfolio:");
+        for (Map.Entry<Stock, Integer> entry : stocks.entrySet()) {
+            System.out.println(entry.getKey() + " - " + entry.getValue() + " shares");
+        }
+        System.out.println("Balance: $" + balance);
+    }
+}
+
+class TradingPlatform {
+    private List<Stock> market = new ArrayList<>();
+    private Portfolio portfolio;
+
+    public TradingPlatform(double initialBalance) {
+        this.portfolio = new Portfolio(initialBalance);
+        generateMarket();
+    }
+
+    private void generateMarket() {
+        market.add(new Stock("AAPL", 150.00));
+        market.add(new Stock("GOOGL", 2800.00));
+        market.add(new Stock("TSLA", 800.00));
+        market.add(new Stock("AMZN", 3500.00));
+    }
+
+    public void displayMarket() {
+        System.out.println("Market Data:");
+        for (int i = 0; i < market.size(); i++) {
+            System.out.println((i + 1) + ". " + market.get(i));
+        }
+    }
+
+    public void buyStock(int stockIndex, int quantity) {
+        if (stockIndex < 1 || stockIndex > market.size()) {
+            System.out.println("Invalid stock selection.");
+            return;
+        }
+        Stock stock = market.get(stockIndex - 1);
+        portfolio.buyStock(stock, quantity);
+    }
+
+    public void sellStock(int stockIndex, int quantity) {
+        if (stockIndex < 1 || stockIndex > market.size()) {
+            System.out.println("Invalid stock selection.");
+            return;
+        }
+        Stock stock = market.get(stockIndex - 1);
+        portfolio.sellStock(stock, quantity);
+    }
+
+    public void updatePrices() {
+        Random rand = new Random();
+        for (Stock stock : market) {
+            double priceChange = rand.nextDouble() * 20 - 10;
+            stock.setPrice(stock.getPrice() + priceChange);
+        }
+        System.out.println("Market prices updated.");
+    }
+
+    public void displayPortfolio() {
+        portfolio.displayPortfolio();
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        TradingPlatform platform = new TradingPlatform(10000);
+
+        while (true) {
+            System.out.println("\n--- Simulated Stock Trading Platform ---");
+            System.out.println("1. View Market");
+            System.out.println("2. Buy Stock");
+            System.out.println("3. Sell Stock");
+            System.out.println("4. View Portfolio");
+            System.out.println("5. Update Prices");
+            System.out.println("6. Exit");
+            System.out.print("Choose an option: ");
+            int option = scanner.nextInt();
+
+            switch (option) {
+                case 1:
+                    platform.displayMarket();
+                    break;
+                case 2:
+                    platform.displayMarket();
+                    System.out.print("Enter stock number to buy: ");
+                    int stockIndexToBuy = scanner.nextInt();
+                    System.out.print("Enter quantity: ");
+                    int quantityToBuy = scanner.nextInt();
+                    platform.buyStock(stockIndexToBuy, quantityToBuy);
+                    break;
+                case 3:
+                    platform.displayMarket();
+                    System.out.print("Enter stock number to sell: ");
+                    int stockIndexToSell = scanner.nextInt();
+                    System.out.print("Enter quantity: ");
+                    int quantityToSell = scanner.nextInt();
+                    platform.sellStock(stockIndexToSell, quantityToSell);
+                    break;
+                case 4:
+                    platform.displayPortfolio();
+                    break;
+                case 5:
+                    platform.updatePrices();
+                    break;
+                case 6:
+                    System.out.println("Exiting the platform...");
+                    return;
+                default:
+                    System.out.println("Invalid option.");
+            }
+        }
+    }
+}
